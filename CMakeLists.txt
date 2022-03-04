@@ -3,7 +3,7 @@ project(capturePointcloud)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(capturePointcloud capture.cpp)
+add_executable(capturePointcloud capture.cpp multicam.cpp multicam.h)
 
 find_package(PCL 1.6 REQUIRED)
 
