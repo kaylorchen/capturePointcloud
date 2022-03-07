@@ -17,7 +17,10 @@
 
 class multicam {
 public:
-    multicam(std::string serial_number,  bool rgb_enable, bool infrared_enable, bool depth_enable, int width, int height, int framerate);
+    multicam(std::string serial_number,
+             bool rgb_enable, int rgb_width, int rgb_height, int rgb_framerate,
+             bool infrared_enable, int infrared_width, int infrared_height, int infrared_framerate,
+             bool depth_enable, int depth_width, int depth_height, int depth_framerate);
 
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr multicamPointXYZRGB(void);
 
@@ -27,6 +30,7 @@ private:
     std::tuple<uint8_t, uint8_t, uint8_t> get_texcolor(rs2::video_frame texture, rs2::texture_coordinate texcoords);
 
     rs2::pipeline mPipe;
+    rs2::pointcloud mPc;
 
     bool mRgb_enable = false;
     bool mInfrared_enable = false;

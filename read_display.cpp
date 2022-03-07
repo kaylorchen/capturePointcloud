@@ -6,19 +6,40 @@
 #include <pcl/io/pcd_io.h> //PCL的PCD格式文件的输入输出头文件
 #include <pcl/point_types.h> //PCL对各种格式的点的支持头文件
 #include <pcl/visualization/cloud_viewer.h>//点云查看窗口头文件
-int main(int argc, char** argv)
+#include "multicam.h"
+#include "boost/thread/thread.hpp"
+
+boost::shared_ptr<pcl::visualization::PCLVisualizer> rgbVis (pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud)
 {
+    // --------------------------------------------
+    // -----Open 3D viewer and add point cloud-----
+    // --------------------------------------------
+    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
+    viewer->setBackgroundColor (0, 0, 0);
+    /***************************************************************************************************************
+    设置窗口的背景颜色后，创建一个颜色处理对象，PointCloudColorHandlerRGBField利用这样的对象显示自定义颜色数据，PointCloudColorHandlerRGBField
+     对象得到每个点云的RGB颜色字段，
+    **************************************************************************************************************/
+
+    pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(cloud);
+    viewer->addPointCloud<pcl::PointXYZRGB> (cloud, rgb, "sample cloud");
+    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "sample cloud");
+    viewer->addCoordinateSystem (1.0);
+    viewer->initCameraParameters ();
+    return (viewer);
+}
+int main(int argc, char **argv) {
+    multicam main("146222253926", true, 640, 480, 30,
+                  true, 640, 480, 30,
+                  true, 640, 480, 30);
+    auto cloud = main.multicamPointXYZRGB();
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>); // 创建点云（指针）
 
-    if (pcl::io::loadPCDFile<pcl::PointXYZ>("cloud_test.pcd", *cloud) == -1) //* 读入PCD格式的文件，如果文件不存在，返回-1
-    {
-        PCL_ERROR("Couldn't read file cloud_test.pcd \n"); //文件不存在时，返回错误，终止程序。
-        return (-1);
+    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
+    viewer = rgbVis(cloud);
+    while (!viewer->wasStopped()) {
+        viewer->spinOnce(100);
+        boost::this_thread::sleep(boost::posix_time::microseconds(100000));
     }
-    pcl::visualization::CloudViewer viewer("Simple Cloud Viewer");//直接创造一个显示窗口
-    viewer.showCloud(cloud);//再这个窗口显示点云
-    while (!viewer.wasStopped())
-    {
-    }
-    return (0);
+    return EXIT_SUCCESS;
 }
