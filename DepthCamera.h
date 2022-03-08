@@ -2,8 +2,8 @@
 // Created by kaylor on 2022/3/4.
 //
 
-#ifndef CAPTUREPOINTCLOUD_MULTICAM_H
-#define CAPTUREPOINTCLOUD_MULTICAM_H
+#ifndef CAPTUREPOINTCLOUD_DEPTHCAMERA_H
+#define CAPTUREPOINTCLOUD_DEPTHCAMERA_H
 
 #include <librealsense2/hpp/rs_pipeline.hpp>
 #include "librealsense2/rs.h"
@@ -15,12 +15,12 @@
 #include <pcl/io/pcd_io.h>
 #include <opencv2/opencv.hpp>
 
-class multicam {
+class DepthCamera {
 public:
-    multicam(std::string serial_number,
-             bool rgb_enable, int rgb_width, int rgb_height, int rgb_framerate,
-             bool infrared_enable, int infrared_width, int infrared_height, int infrared_framerate,
-             bool depth_enable, int depth_width, int depth_height, int depth_framerate);
+    DepthCamera(std::string serial_number,
+                bool rgb_enable, int rgb_width, int rgb_height, int rgb_framerate,
+                bool infrared_enable, int infrared_width, int infrared_height, int infrared_framerate,
+                bool depth_enable, int depth_width, int depth_height, int depth_framerate);
 
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr multicamPointXYZRGB(void);
 
@@ -47,4 +47,4 @@ private:
 };
 
 
-#endif //CAPTUREPOINTCLOUD_MULTICAM_H
+#endif //CAPTUREPOINTCLOUD_DEPTHCAMERA_H

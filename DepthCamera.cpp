@@ -2,12 +2,12 @@
 // Created by kaylor on 2022/3/4.
 //
 
-#include "multicam.h"
+#include "DepthCamera.h"
 
-multicam::multicam(std::string serial_number,
-                   bool rgb_enable, int rgb_width, int rgb_height, int rgb_framerate,
-                   bool infrared_enable, int infrared_width, int infrared_height, int infrared_framerate,
-                   bool depth_enable, int depth_width, int depth_height, int depth_framerate) {
+DepthCamera::DepthCamera(std::string serial_number,
+                         bool rgb_enable, int rgb_width, int rgb_height, int rgb_framerate,
+                         bool infrared_enable, int infrared_width, int infrared_height, int infrared_framerate,
+                         bool depth_enable, int depth_width, int depth_height, int depth_framerate) {
     std::cout << "This camera serial number is " << serial_number << std::endl;
     rs2::config cfg;
     mRgb_enable = rgb_enable;
@@ -43,7 +43,7 @@ multicam::multicam(std::string serial_number,
 }
 
 std::tuple<uint8_t, uint8_t, uint8_t>
-multicam::get_texcolor(rs2::video_frame texture, rs2::texture_coordinate texcoords) {
+DepthCamera::get_texcolor(rs2::video_frame texture, rs2::texture_coordinate texcoords) {
     const int w = texture.get_width(), h = texture.get_height();
 
     // convert normals [u v] to basic coords [x y]
@@ -55,7 +55,7 @@ multicam::get_texcolor(rs2::video_frame texture, rs2::texture_coordinate texcoor
     return std::tuple<uint8_t, uint8_t, uint8_t>(texture_data[idx], texture_data[idx + 1], texture_data[idx + 2]);
 }
 
-pcl::PointCloud<pcl::PointXYZRGB>::Ptr multicam::multicamPointXYZRGB(void) {
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr DepthCamera::multicamPointXYZRGB(void) {
     auto frames = mPipe.wait_for_frames();
     auto depth = frames.get_depth_frame();
     auto colored_frame = frames.get_color_frame();
@@ -91,7 +91,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr multicam::multicamPointXYZRGB(void) {
     return cloud;
 }
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr multicam::multicamPointXYZ(void) {
+pcl::PointCloud<pcl::PointXYZ>::Ptr DepthCamera::multicamPointXYZ(void) {
     auto frames = mPipe.wait_for_frames();
     auto depth = frames.get_depth_frame();
 

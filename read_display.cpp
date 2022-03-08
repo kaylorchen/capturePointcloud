@@ -6,7 +6,7 @@
 #include <pcl/io/pcd_io.h> //PCL的PCD格式文件的输入输出头文件
 #include <pcl/point_types.h> //PCL对各种格式的点的支持头文件
 #include <pcl/visualization/cloud_viewer.h>//点云查看窗口头文件
-#include "multicam.h"
+#include "DepthCamera.h"
 #include "boost/thread/thread.hpp"
 
 boost::shared_ptr<pcl::visualization::PCLVisualizer> rgbVis (pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud)
@@ -29,9 +29,9 @@ boost::shared_ptr<pcl::visualization::PCLVisualizer> rgbVis (pcl::PointCloud<pcl
     return (viewer);
 }
 int main(int argc, char **argv) {
-    multicam main("146222253926", true, 640, 480, 30,
-                  true, 640, 480, 30,
-                  true, 640, 480, 30);
+    DepthCamera main("146222253926", true, 640, 480, 30,
+                     true, 640, 480, 30,
+                     true, 640, 480, 30);
     auto cloud = main.multicamPointXYZRGB();
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>); // 创建点云（指针）
 
