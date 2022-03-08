@@ -27,3 +27,6 @@ target_link_libraries(read_display ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRA
 
 add_executable(test test.cpp)
 target_link_libraries (test ${PCL_LIBRARIES} librealsense2.so ${OpenCV_LIBS} ${Boost_LIBRARIES} pthread boost_thread)
+
+add_executable(mutilcam mutilcam.cpp DepthCamera.cpp)
+target_link_libraries(mutilcam ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} pthread boost_thread librealsense2.so)

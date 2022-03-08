@@ -25,6 +25,7 @@ DepthCamera::DepthCamera(std::string serial_number,
 
 
     // Add desired streams to configuration
+    cfg.enable_device(serial_number);
     if (mRgb_enable) {
         cfg.enable_stream(RS2_STREAM_COLOR, mRgb_width, mRgb_height, RS2_FORMAT_BGR8, mRgb_framerate);
     }
@@ -55,7 +56,7 @@ DepthCamera::get_texcolor(rs2::video_frame texture, rs2::texture_coordinate texc
     return std::tuple<uint8_t, uint8_t, uint8_t>(texture_data[idx], texture_data[idx + 1], texture_data[idx + 2]);
 }
 
-pcl::PointCloud<pcl::PointXYZRGB>::Ptr DepthCamera::multicamPointXYZRGB(void) {
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr DepthCamera::depthCameraPointXYZRGB(void) {
     auto frames = mPipe.wait_for_frames();
     auto depth = frames.get_depth_frame();
     auto colored_frame = frames.get_color_frame();
@@ -91,7 +92,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr DepthCamera::multicamPointXYZRGB(void) {
     return cloud;
 }
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr DepthCamera::multicamPointXYZ(void) {
+pcl::PointCloud<pcl::PointXYZ>::Ptr DepthCamera::depthCameraPointXYZ(void) {
     auto frames = mPipe.wait_for_frames();
     auto depth = frames.get_depth_frame();
 

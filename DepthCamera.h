@@ -22,9 +22,9 @@ public:
                 bool infrared_enable, int infrared_width, int infrared_height, int infrared_framerate,
                 bool depth_enable, int depth_width, int depth_height, int depth_framerate);
 
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr multicamPointXYZRGB(void);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr depthCameraPointXYZRGB(void);
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr multicamPointXYZ(void);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr depthCameraPointXYZ(void);
 
 private:
     std::tuple<uint8_t, uint8_t, uint8_t> get_texcolor(rs2::video_frame texture, rs2::texture_coordinate texcoords);

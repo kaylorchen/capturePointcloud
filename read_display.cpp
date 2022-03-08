@@ -21,17 +21,17 @@ void showFramerate() {
 //#define PointXYZRGB
 
 int main(int argc, char **argv) {
-    DepthCamera main("146222253926", true, 640, 480, 30,
+    DepthCamera main("146222253257", true, 640, 480, 30,
                      true, 640, 480, 30,
                      true, 640, 480, 30);
 #ifdef PointXYZRGB
-    auto cloud = main.multicamPointXYZRGB();
+    auto cloud = main.depthCameraPointXYZRGB();
 #else
-    auto cloud = main.multicamPointXYZ();
+    auto cloud = main.depthCameraPointXYZ();
 #endif
 
 //    while (true) {
-//        main.multicamPointXYZRGB();
+//        main.depthCameraPointXYZRGB();
 //        showFramerate();
 //    }
 
@@ -39,9 +39,9 @@ int main(int argc, char **argv) {
     viewer.showCloud(cloud);
     while (!viewer.wasStopped()) {
 #ifdef PointXYZRGB
-        cloud = main.multicamPointXYZRGB();
+        cloud = main.depthCameraPointXYZRGB();
 #else
-        cloud = main.multicamPointXYZ();
+        cloud = main.depthCameraPointXYZ();
 #endif
         viewer.showCloud(cloud);
         showFramerate();
