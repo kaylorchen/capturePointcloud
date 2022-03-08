@@ -77,7 +77,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr DepthCamera::multicamPointXYZRGB(void) {
     // and RGB values
     for (int i = 0; i < points.size(); ++i) {
         cloud->points[i].x = vertices[i].x;
-        cloud->points[i].y = vertices[i].y;
+        cloud->points[i].y = -vertices[i].y;
         cloud->points[i].z = vertices[i].z;
 
         std::tuple<uint8_t, uint8_t, uint8_t> current_color;
@@ -110,7 +110,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr DepthCamera::multicamPointXYZ(void) {
     // and RGB values
     for (int i = 0; i < points.size(); ++i) {
         cloud->points[i].x = vertices[i].x;
-        cloud->points[i].y = vertices[i].y;
+        cloud->points[i].y = -vertices[i].y;
         cloud->points[i].z = vertices[i].z;
     }
     return cloud;

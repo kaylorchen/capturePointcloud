@@ -18,12 +18,17 @@ void showFramerate() {
     std::cout << "Framerate is " << 1000.0/(current - last) << std::endl;
     last = current;
 }
+//#define PointXYZRGB
 
 int main(int argc, char **argv) {
     DepthCamera main("146222253926", true, 640, 480, 30,
                      true, 640, 480, 30,
                      true, 640, 480, 30);
+#ifdef PointXYZRGB
     auto cloud = main.multicamPointXYZRGB();
+#else
+    auto cloud = main.multicamPointXYZ();
+#endif
 
 //    while (true) {
 //        main.multicamPointXYZRGB();
@@ -33,7 +38,11 @@ int main(int argc, char **argv) {
     pcl::visualization::CloudViewer viewer("Cloud Viewer");
     viewer.showCloud(cloud);
     while (!viewer.wasStopped()) {
+#ifdef PointXYZRGB
         cloud = main.multicamPointXYZRGB();
+#else
+        cloud = main.multicamPointXYZ();
+#endif
         viewer.showCloud(cloud);
         showFramerate();
     }
