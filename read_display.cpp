@@ -8,38 +8,34 @@
 #include <pcl/visualization/cloud_viewer.h>//点云查看窗口头文件
 #include "DepthCamera.h"
 #include "boost/thread/thread.hpp"
+#include "time.h"
 
-boost::shared_ptr<pcl::visualization::PCLVisualizer> rgbVis (pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud)
-{
-    // --------------------------------------------
-    // -----Open 3D viewer and add point cloud-----
-    // --------------------------------------------
-    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
-    viewer->setBackgroundColor (0, 0, 0);
-    /***************************************************************************************************************
-    设置窗口的背景颜色后，创建一个颜色处理对象，PointCloudColorHandlerRGBField利用这样的对象显示自定义颜色数据，PointCloudColorHandlerRGBField
-     对象得到每个点云的RGB颜色字段，
-    **************************************************************************************************************/
-
-    pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(cloud);
-    viewer->addPointCloud<pcl::PointXYZRGB> (cloud, rgb, "sample cloud");
-    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "sample cloud");
-    viewer->addCoordinateSystem (1.0);
-    viewer->initCameraParameters ();
-    return (viewer);
+void showFramerate() {
+    struct timespec timestamp;
+    clock_gettime(CLOCK_MONOTONIC, &timestamp);
+    static uint64_t last;
+    uint64_t current =  timestamp.tv_sec * 1000 + timestamp.tv_nsec / 1000000;
+    std::cout << "Framerate is " << 1000.0/(current - last) << std::endl;
+    last = current;
 }
+
 int main(int argc, char **argv) {
     DepthCamera main("146222253926", true, 640, 480, 30,
                      true, 640, 480, 30,
                      true, 640, 480, 30);
     auto cloud = main.multicamPointXYZRGB();
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>); // 创建点云（指针）
 
-    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
-    viewer = rgbVis(cloud);
-    while (!viewer->wasStopped()) {
-        viewer->spinOnce(100);
-        boost::this_thread::sleep(boost::posix_time::microseconds(100000));
+//    while (true) {
+//        main.multicamPointXYZRGB();
+//        showFramerate();
+//    }
+
+    pcl::visualization::CloudViewer viewer("Cloud Viewer");
+    viewer.showCloud(cloud);
+    while (!viewer.wasStopped()) {
+        cloud = main.multicamPointXYZRGB();
+        viewer.showCloud(cloud);
+        showFramerate();
     }
     return EXIT_SUCCESS;
 }

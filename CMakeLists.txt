@@ -3,7 +3,7 @@ project(capturePointcloud)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(capturePointcloud capture.cpp DepthCamera.cpp DepthCamera.h)
+add_executable(capturePointcloud capture.cpp )
 
 find_package(PCL 1.6 REQUIRED)
 
@@ -22,8 +22,8 @@ add_definitions(${PCL_DEFINITIONS})
 
 target_link_libraries (capturePointcloud ${PCL_LIBRARIES} librealsense2.so ${OpenCV_LIBS} ${Boost_LIBRARIES} pthread boost_thread)
 
-add_executable(read_display read_display.cpp)
-target_link_libraries(read_display ${PCL_LIBRARIES} ${OpenCV_LIBS})
+add_executable(read_display read_display.cpp DepthCamera.cpp)
+target_link_libraries(read_display ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES} pthread boost_thread librealsense2.so)
 
 add_executable(test test.cpp)
 target_link_libraries (test ${PCL_LIBRARIES} librealsense2.so ${OpenCV_LIBS} ${Boost_LIBRARIES} pthread boost_thread)
