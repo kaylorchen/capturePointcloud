@@ -4,6 +4,24 @@
 
 #include "DepthCamera.h"
 
+DepthCamera::DepthCamera(std::string serial_number, std::unique_ptr<Eigen::Affine3d> transform,
+                         bool rgb_enable, int rgb_width, int rgb_height, int rgb_framerate,
+                         bool infrared_enable, int infrared_width, int infrared_height, int infrared_framerate,
+                         bool depth_enable, int depth_width, int depth_height, int depth_framerate) {
+    new(this)DepthCamera(serial_number,
+                         rgb_enable, rgb_width, rgb_height, rgb_framerate,
+                         infrared_enable, infrared_width, infrared_height, infrared_framerate,
+                         depth_enable, depth_width, depth_height, depth_framerate);
+    //上面使用的new方法调用其他的构造函数，必须先执行它，不然已经赋值的参数将会被重新初始化
+    mTransform = std::move(transform);
+    if (mTransform != nullptr)
+    {
+        std::cout << mTransform->matrix() << std::endl;
+    }else{
+        std::cout << "mTransform is till null\n";
+    }
+}
+
 DepthCamera::DepthCamera(std::string serial_number,
                          bool rgb_enable, int rgb_width, int rgb_height, int rgb_framerate,
                          bool infrared_enable, int infrared_width, int infrared_height, int infrared_framerate,
@@ -37,7 +55,7 @@ DepthCamera::DepthCamera(std::string serial_number,
     }
     mPipe.start(cfg);
     // Camera warmup - dropping several first frames to let auto-exposure stabilize
-    for (int i = 0; i < 100; ++i) {
+    for (int i = 0; i < 10; ++i) {
         auto frames = mPipe.wait_for_frames();
     }
     std::cout << "Camera " << serial_number << " initialization is complete" << std::endl;
@@ -72,12 +90,13 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr DepthCamera::depthCameraPointXYZRGB(void)
     cloud->is_dense = false;
     cloud->points.resize(points.size());
 
+
     auto tex_coords = points.get_texture_coordinates();
     auto vertices = points.get_vertices();
     // Iterating through all points and setting XYZ coordinates
     // and RGB values
     for (int i = 0; i < points.size(); ++i) {
-        cloud->points[i].x = vertices[i].x;
+        cloud->points[i].x = -vertices[i].x;
         cloud->points[i].y = -vertices[i].y;
         cloud->points[i].z = vertices[i].z;
 
@@ -88,6 +107,9 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr DepthCamera::depthCameraPointXYZRGB(void)
         cloud->points[i].r = std::get<2>(current_color);
         cloud->points[i].g = std::get<1>(current_color);
         cloud->points[i].b = std::get<0>(current_color);
+    }
+    if (mTransform != nullptr) {
+        pcl::transformPointCloud(*cloud, *cloud, *mTransform);
     }
     return cloud;
 }
@@ -110,9 +132,12 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr DepthCamera::depthCameraPointXYZ(void) {
     // Iterating through all points and setting XYZ coordinates
     // and RGB values
     for (int i = 0; i < points.size(); ++i) {
-        cloud->points[i].x = vertices[i].x;
+        cloud->points[i].x = -vertices[i].x;
         cloud->points[i].y = -vertices[i].y;
         cloud->points[i].z = vertices[i].z;
+    }
+    if (mTransform != nullptr) {
+        pcl::transformPointCloud(*cloud, *cloud, *mTransform);
     }
     return cloud;
 }

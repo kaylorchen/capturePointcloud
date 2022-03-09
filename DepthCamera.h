@@ -13,11 +13,18 @@
 #include <pcl/point_types.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/io/pcd_io.h>
+#include "pcl/common/transforms.h"
 #include <opencv2/opencv.hpp>
+#include "memory"
 
 class DepthCamera {
 public:
     DepthCamera(std::string serial_number,
+                bool rgb_enable, int rgb_width, int rgb_height, int rgb_framerate,
+                bool infrared_enable, int infrared_width, int infrared_height, int infrared_framerate,
+                bool depth_enable, int depth_width, int depth_height, int depth_framerate);
+
+    DepthCamera(std::string serial_number, std::unique_ptr<Eigen::Affine3d> transform,
                 bool rgb_enable, int rgb_width, int rgb_height, int rgb_framerate,
                 bool infrared_enable, int infrared_width, int infrared_height, int infrared_framerate,
                 bool depth_enable, int depth_width, int depth_height, int depth_framerate);
@@ -44,6 +51,8 @@ private:
     int mRgb_framerate;
     int mInfrared_framerate;
     int mDepth_framerate;
+
+    std::unique_ptr<Eigen::Affine3d> mTransform = nullptr;
 };
 
 

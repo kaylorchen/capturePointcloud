@@ -22,13 +22,18 @@ void showFramerate() {
 #define XYZRGB
 
 int main(int argc, char **argv) {
-    DepthCamera first("146222253926", true, 640, 480, 30,
-                      true, 640, 480, 30,
-                      true, 640, 480, 30);
 
-    DepthCamera second("146222253257", true, 640, 480, 30,
-                       true, 640, 480, 30,
-                       true, 640, 480, 30);
+    auto firstTransform = std::make_unique<Eigen::Affine3d>(Eigen::Affine3f::Identity());
+    firstTransform->translation() << 0, 0, -0.1;
+    firstTransform->rotate(Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitY()));
+    DepthCamera first("146222253926", std::move(firstTransform),
+                      true, 848, 480, 60,
+                      true, 848, 480, 60,
+                      true, 848, 480, 60);
+    DepthCamera second("146222253257",
+                       true, 848, 480, 60,
+                       true, 848, 480, 60,
+                       true, 848, 480, 60);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr firstCloud;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr secondCloud;
 
@@ -38,6 +43,7 @@ int main(int argc, char **argv) {
 #ifdef XYZRGB
         firstCloud = first.depthCameraPointXYZRGB();
         secondCloud = second.depthCameraPointXYZRGB();
+
 #else
         firstCloud = first.depthCameraPointXYZ();
         secondCloud = second.depthCameraPointXYZ();
@@ -48,19 +54,21 @@ int main(int argc, char **argv) {
 
         uint32_t count = 0;
         uint32_t i = 0;
-        while (count < firstCloud->size()) {
+        while (i < firstCloud->size()) {
             cloud->points[count] = firstCloud->points[i];
             count++;
             i++;
         }
         i = 0;
-        while (count < secondCloud->size()) {
+        while (i < secondCloud->size()) {
             cloud->points[count] = secondCloud->points[i];
             count++;
             i++;
         }
+        std::cout << cloud->size() << " " << firstCloud->size() << " " << secondCloud->size() << count<< std::endl;
 
-//        viewer.showCloud(cloud);
+
+        viewer.showCloud(cloud);
         showFramerate();
     }
     return EXIT_SUCCESS;
