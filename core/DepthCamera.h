@@ -17,6 +17,7 @@
 #include <opencv2/opencv.hpp>
 #include "memory"
 
+
 class DepthCamera {
 public:
     DepthCamera(std::string serial_number,
@@ -24,7 +25,7 @@ public:
                 bool infrared_enable, int infrared_width, int infrared_height, int infrared_framerate,
                 bool depth_enable, int depth_width, int depth_height, int depth_framerate);
 
-    DepthCamera(std::string serial_number, std::unique_ptr<Eigen::Affine3d> transform,
+    DepthCamera(std::string serial_number, std::unique_ptr<Eigen::Affine3f> transform,
                 bool rgb_enable, int rgb_width, int rgb_height, int rgb_framerate,
                 bool infrared_enable, int infrared_width, int infrared_height, int infrared_framerate,
                 bool depth_enable, int depth_width, int depth_height, int depth_framerate);
@@ -33,11 +34,15 @@ public:
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr depthCameraPointXYZ(void);
 
+    rs2::pipeline mPipe;
+    rs2::pointcloud mPc;
+    rs2::points mPoints;
+    std::unique_ptr<Eigen::Affine3f> mTransform = nullptr;
+
+
 private:
     std::tuple<uint8_t, uint8_t, uint8_t> get_texcolor(rs2::video_frame texture, rs2::texture_coordinate texcoords);
 
-    rs2::pipeline mPipe;
-    rs2::pointcloud mPc;
 
     bool mRgb_enable = false;
     bool mInfrared_enable = false;
@@ -52,7 +57,7 @@ private:
     int mInfrared_framerate;
     int mDepth_framerate;
 
-    std::unique_ptr<Eigen::Affine3d> mTransform = nullptr;
+
 };
 
 

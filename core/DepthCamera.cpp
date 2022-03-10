@@ -4,7 +4,7 @@
 
 #include "DepthCamera.h"
 
-DepthCamera::DepthCamera(std::string serial_number, std::unique_ptr<Eigen::Affine3d> transform,
+DepthCamera::DepthCamera(std::string serial_number, std::unique_ptr<Eigen::Affine3f> transform,
                          bool rgb_enable, int rgb_width, int rgb_height, int rgb_framerate,
                          bool infrared_enable, int infrared_width, int infrared_height, int infrared_framerate,
                          bool depth_enable, int depth_width, int depth_height, int depth_framerate) {
@@ -45,7 +45,7 @@ DepthCamera::DepthCamera(std::string serial_number,
     // Add desired streams to configuration
     cfg.enable_device(serial_number);
     if (mRgb_enable) {
-        cfg.enable_stream(RS2_STREAM_COLOR, mRgb_width, mRgb_height, RS2_FORMAT_BGR8, mRgb_framerate);
+        cfg.enable_stream(RS2_STREAM_COLOR, mRgb_width, mRgb_height, RS2_FORMAT_RGB8, mRgb_framerate);
     }
     if (mInfrared_enable) {
         cfg.enable_stream(RS2_STREAM_INFRARED, mInfrared_width, mInfrared_height, RS2_FORMAT_Y8, mInfrared_framerate);
@@ -141,3 +141,4 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr DepthCamera::depthCameraPointXYZ(void) {
     }
     return cloud;
 }
+

@@ -6,7 +6,7 @@
 #include <pcl/io/pcd_io.h> //PCL的PCD格式文件的输入输出头文件
 #include <pcl/point_types.h> //PCL对各种格式的点的支持头文件
 #include <pcl/visualization/cloud_viewer.h>//点云查看窗口头文件
-#include "DepthCamera.h"
+#include "core/DepthCamera.h"
 #include "boost/thread/thread.hpp"
 #include "time.h"
 
@@ -67,8 +67,7 @@ int main(int argc, char **argv) {
         }
         std::cout << cloud->size() << " " << firstCloud->size() << " " << secondCloud->size() << count<< std::endl;
 
-
-        viewer.showCloud(cloud);
+        viewer.showCloud(secondCloud);
         showFramerate();
     }
     return EXIT_SUCCESS;
