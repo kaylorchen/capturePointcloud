@@ -3,6 +3,7 @@
 //
 
 #include "DepthCamera.h"
+#include "time.h"
 
 DepthCamera::DepthCamera(std::string serial_number, std::unique_ptr<Eigen::Affine3f> transform,
                          bool rgb_enable, int rgb_width, int rgb_height, int rgb_framerate,
@@ -25,7 +26,7 @@ DepthCamera::DepthCamera(std::string serial_number, std::unique_ptr<Eigen::Affin
 DepthCamera::DepthCamera(std::string serial_number,
                          bool rgb_enable, int rgb_width, int rgb_height, int rgb_framerate,
                          bool infrared_enable, int infrared_width, int infrared_height, int infrared_framerate,
-                         bool depth_enable, int depth_width, int depth_height, int depth_framerate) {
+                         bool depth_enable, int depth_width, int depth_height, int depth_framerate):serial_name(serial_number) {
     std::cout << "This camera serial number is " << serial_number << std::endl;
     rs2::config cfg;
     mRgb_enable = rgb_enable;
@@ -140,5 +141,31 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr DepthCamera::depthCameraPointXYZ(void) {
         pcl::transformPointCloud(*cloud, *cloud, *mTransform);
     }
     return cloud;
+}
+
+void DepthCamera::processPointCloud(void) {
+    auto frames = mPipe.wait_for_frames();
+    auto depth = frames.get_depth_frame();
+    mPoints = mPc.calculate(depth);
+    struct timespec timestamp;
+    clock_gettime(CLOCK_MONOTONIC, &timestamp);
+    uint64_t current = timestamp.tv_sec * 1000 + timestamp.tv_nsec / 1000000;
+    //printf是线程安全的，cout不是
+    printf("serial is %s, framerate is %f\n", serial_name.c_str(), 1000.0 / (current - last_time));
+    last_time = current;
+}
+
+void DepthCamera::processPointCloudwithRGB(void) {
+    auto frames = mPipe.wait_for_frames();
+    auto depth = frames.get_depth_frame();
+    auto color = frames.get_color_frame();
+    mPc.map_to(color);
+    mPoints = mPc.calculate(depth);
+    struct timespec timestamp;
+    clock_gettime(CLOCK_MONOTONIC, &timestamp);
+    uint64_t current = timestamp.tv_sec * 1000 + timestamp.tv_nsec / 1000000;
+    //printf是线程安全的，cout不是
+    printf("serial is %s, framerate is %f\n", serial_name.c_str(), 1000.0 / (current - last_time));
+    last_time = current;
 }
 

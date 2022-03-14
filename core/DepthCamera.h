@@ -34,6 +34,9 @@ public:
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr depthCameraPointXYZ(void);
 
+    void processPointCloud(void);
+    void processPointCloudwithRGB(void);
+
     rs2::pipeline mPipe;
     rs2::pointcloud mPc;
     rs2::points mPoints;
@@ -57,6 +60,8 @@ private:
     int mInfrared_framerate;
     int mDepth_framerate;
 
+    unsigned int last_time = 0;
+    std::string serial_name;
 
 };
 
