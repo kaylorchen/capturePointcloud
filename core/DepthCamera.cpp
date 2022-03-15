@@ -15,10 +15,16 @@ DepthCamera::DepthCamera(std::string serial_number, std::unique_ptr<Eigen::Affin
                          depth_enable, depth_width, depth_height, depth_framerate);
     //上面使用的new方法调用其他的构造函数，必须先执行它，不然已经赋值的参数将会被重新初始化
     mTransform = std::move(transform);
-    if (mTransform != nullptr)
-    {
+    if (mTransform != nullptr) {
         std::cout << mTransform->matrix() << std::endl;
-    }else{
+        auto depth_stream = mPipelineProfile.get_stream(RS2_STREAM_DEPTH).as<rs2::video_stream_profile>();
+        auto depthCameraParams = depth_stream.get_intrinsics();
+        Eigen::Matrix3f K;
+        K << 	depthCameraParams.fx, 		0.0, 						depthCameraParams.ppx,
+                0.0, 						depthCameraParams.fy, 		depthCameraParams.ppy,
+                0.0, 						0.0, 						1.0;
+        calculateMatrixA_B(K, mTransform->rotation(), mTransform->translation());
+    } else {
         std::cout << "mTransform is till null\n";
     }
 }
@@ -26,7 +32,8 @@ DepthCamera::DepthCamera(std::string serial_number, std::unique_ptr<Eigen::Affin
 DepthCamera::DepthCamera(std::string serial_number,
                          bool rgb_enable, int rgb_width, int rgb_height, int rgb_framerate,
                          bool infrared_enable, int infrared_width, int infrared_height, int infrared_framerate,
-                         bool depth_enable, int depth_width, int depth_height, int depth_framerate):serial_name(serial_number) {
+                         bool depth_enable, int depth_width, int depth_height, int depth_framerate) : serial_name(
+        serial_number) {
     std::cout << "This camera serial number is " << serial_number << std::endl;
     rs2::config cfg;
     mRgb_enable = rgb_enable;
@@ -54,7 +61,7 @@ DepthCamera::DepthCamera(std::string serial_number,
     if (mDepth_enable) {
         cfg.enable_stream(RS2_STREAM_DEPTH, mDepth_width, mDepth_height, RS2_FORMAT_Z16, mDepth_framerate);
     }
-    mPipe.start(cfg);
+    mPipelineProfile = mPipe.start(cfg);
     // Camera warmup - dropping several first frames to let auto-exposure stabilize
     for (int i = 0; i < 10; ++i) {
         auto frames = mPipe.wait_for_frames();
@@ -73,6 +80,11 @@ DepthCamera::get_texcolor(rs2::video_frame texture, rs2::texture_coordinate texc
     int idx = x * texture.get_bytes_per_pixel() + y * texture.get_stride_in_bytes();
     const auto texture_data = reinterpret_cast<const uint8_t *>(texture.get_data());
     return std::tuple<uint8_t, uint8_t, uint8_t>(texture_data[idx], texture_data[idx + 1], texture_data[idx + 2]);
+}
+
+void DepthCamera::calculateMatrixA_B(Eigen::Matrix3f K, Eigen::Matrix3f R, Eigen::Vector3f T) {
+    A = R.inverse() * K.inverse();
+    B = -R.inverse() * T;
 }
 
 pcl::PointCloud<pcl::PointXYZRGB>::Ptr DepthCamera::depthCameraPointXYZRGB(void) {

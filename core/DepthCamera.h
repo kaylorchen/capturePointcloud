@@ -40,11 +40,14 @@ public:
     rs2::pipeline mPipe;
     rs2::pointcloud mPc;
     rs2::points mPoints;
+    rs2::pipeline_profile mPipelineProfile;
     std::unique_ptr<Eigen::Affine3f> mTransform = nullptr;
 
 
 private:
     std::tuple<uint8_t, uint8_t, uint8_t> get_texcolor(rs2::video_frame texture, rs2::texture_coordinate texcoords);
+
+    void calculateMatrixA_B(Eigen::Matrix3f K, Eigen::Matrix3f R, Eigen::Vector3f T);
 
 
     bool mRgb_enable = false;
@@ -62,6 +65,9 @@ private:
 
     unsigned int last_time = 0;
     std::string serial_name;
+
+    Eigen::Matrix3f A;
+    Eigen::Vector3f B;
 
 };
 

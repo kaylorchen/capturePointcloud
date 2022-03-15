@@ -23,9 +23,17 @@ void showFramerate() {
 
 int main(int argc, char **argv) {
 
-    auto firstTransform = std::make_unique<Eigen::Affine3d>(Eigen::Affine3f::Identity());
+    auto firstTransform = std::make_unique<Eigen::Affine3f>(Eigen::Affine3f::Identity());
     firstTransform->translation() << 0, 0, -0.1;
-    firstTransform->rotate(Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitY()));
+    firstTransform->rotate(Eigen::AngleAxisf(M_PI, Eigen::Vector3f::UnitY()));
+    Eigen::Vector3f v;
+    v << 1 , 2 , 3.998845;
+    std::cout << v << std::endl;
+    float *p;
+    p = (float *) &v;
+
+    printf("sizeof(v) = %ld, *p = %f\n", sizeof (v), *(p+2));
+    return 0;
     DepthCamera first("146222253926", std::move(firstTransform),
                       true, 848, 480, 60,
                       true, 848, 480, 60,
