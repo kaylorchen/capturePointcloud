@@ -8,10 +8,16 @@
 const bool rgb_enable = false;
 const int width = 848;
 const int height = 480;
-const int framerate = 60;
+const int framerate = 30;
 
 void process(std::string serial_number) {
-    DepthCamera camera(serial_number,
+    auto firstTransform = std::make_unique<Eigen::Affine3f>(Eigen::Affine3f::Identity());
+//    firstTransform->translation() << 1.58, 0, 0;
+//    firstTransform->rotate(Eigen::AngleAxisf(M_PI/6, Eigen::Vector3f::UnitY()));
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    cloud->resize(width * height);
+    cloud->is_dense = false;
+    DepthCamera camera(serial_number, std::move(firstTransform), cloud, 0,
                        rgb_enable, width, height, framerate,
                        true, width, height, framerate,
                        true, width, height, framerate);
@@ -19,7 +25,8 @@ void process(std::string serial_number) {
         if (rgb_enable) {
             camera.processPointCloudwithRGB();
         } else {
-            camera.processPointCloud();
+            camera.generatePointCloud();
+//            camera.processPointCloud();
         }
     }
 }
