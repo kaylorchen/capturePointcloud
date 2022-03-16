@@ -43,3 +43,6 @@ add_executable(mutilThreadRGBD mutilThread.cpp core/DepthCamera.cpp)
 target_link_libraries(mutilThreadRGBD ${PCL_LIBRARIES} ${OpenCV_LIBS} ${DEPENDENCIES} ${Boost_LIBRARIES} pthread boost_thread librealsense2.so )
 
 add_executable(usage usage.cpp)
+
+add_executable(tmp tmp.cpp)
+target_link_libraries(tmp ${OpenCV_LIBS})

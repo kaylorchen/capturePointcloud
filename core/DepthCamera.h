@@ -20,12 +20,13 @@
 
 class DepthCamera {
 public:
-    DepthCamera(std::string serial_number,
+    DepthCamera(std::string serial_number, std::unique_ptr<Eigen::Affine3f> transform,
+                pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud, unsigned int offset,
                 bool rgb_enable, int rgb_width, int rgb_height, int rgb_framerate,
                 bool infrared_enable, int infrared_width, int infrared_height, int infrared_framerate,
                 bool depth_enable, int depth_width, int depth_height, int depth_framerate);
-
     DepthCamera(std::string serial_number, std::unique_ptr<Eigen::Affine3f> transform,
+                pcl::PointCloud<pcl::PointXYZRGB>::Ptr point_cloud, unsigned int offset,
                 bool rgb_enable, int rgb_width, int rgb_height, int rgb_framerate,
                 bool infrared_enable, int infrared_width, int infrared_height, int infrared_framerate,
                 bool depth_enable, int depth_width, int depth_height, int depth_framerate);
@@ -37,17 +38,28 @@ public:
     void processPointCloud(void);
     void processPointCloudwithRGB(void);
 
+    void generatePointCloud(void);
+    void generatePointCloudwithRGB(void);
+
     rs2::pipeline mPipe;
     rs2::pointcloud mPc;
     rs2::points mPoints;
     rs2::pipeline_profile mPipelineProfile;
     std::unique_ptr<Eigen::Affine3f> mTransform = nullptr;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr mPointCloudXYZ = nullptr;
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr mPointCloudXYZRGB = nullptr;
+    unsigned int mOffset;
+    cv::Mat mX;
+    cv::Mat mY;
+    cv::Mat mZ;
+    cv::Mat mX_pre, mY_pre, mZ_pre;
+    cv::Mat mBx, mBy, mBz;
 
 
 private:
     std::tuple<uint8_t, uint8_t, uint8_t> get_texcolor(rs2::video_frame texture, rs2::texture_coordinate texcoords);
 
-    void calculateMatrixA_B(Eigen::Matrix3f K, Eigen::Matrix3f R, Eigen::Vector3f T);
+    void calculateMatrix(Eigen::Matrix3f K, Eigen::Matrix3f R, Eigen::Vector3f T);
 
 
     bool mRgb_enable = false;

@@ -938,6 +938,67 @@ struct glfw_state {
     float offset_y;
     texture tex;
 };
+#include <pcl/point_types.h>
+// Handles all the OpenGL calls needed to display the point cloud
+void draw_pointcloud(float width, float height, glfw_state& app_state, pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud)
+{
+    if (!pointcloud)
+        return;
+
+    // OpenGL commands that prep screen for the pointcloud
+    glLoadIdentity();
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+    glClearColor(153.f / 255, 153.f / 255, 153.f / 255, 1);
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    gluPerspective(60, width / height, 0.01f, 10.0f);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    gluLookAt(0, 0, 0, 0, 0, 1, 0, -1, 0);
+
+    glTranslatef(0, 0, +0.5f + app_state.offset_y * 0.05f);
+    glRotated(app_state.pitch, 1, 0, 0);
+    glRotated(app_state.yaw, 0, 1, 0);
+    glTranslatef(0, 0, -0.5f);
+
+    glPointSize(width / 640);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, app_state.tex.get_gl_handle());
+    float tex_border_color[] = { 0.8f, 0.8f, 0.8f, 0.8f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, tex_border_color);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, 0x812F); // GL_CLAMP_TO_EDGE
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, 0x812F); // GL_CLAMP_TO_EDGE
+    glBegin(GL_POINTS);
+
+
+
+    for (int i = 0; i < pointcloud->size(); i++)
+    {
+        if (pointcloud->points[i].z)
+        {
+            // upload the point and texture coordinates only for pointcloud we have depth data for
+//            struct rs2::vertex tmp;
+//            tmp.x = pointcloud->points[i].x;
+//            tmp.y = pointcloud->points[i].y;
+//            tmp.z = pointcloud->points[i].z;
+//            printf("%f %f %f\n", tmp.x, tmp.y, tmp.z);
+//            glVertex3fv(tmp.operator const float *());
+            glVertex3fv(( const GLfloat *)(&(pointcloud->points[i])));
+        }
+    }
+
+    // OpenGL cleanup
+    glEnd();
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glPopAttrib();
+}
 
 // Handles all the OpenGL calls needed to display the point cloud
 void draw_pointcloud(float width, float height, glfw_state& app_state, rs2::points& points)
@@ -984,7 +1045,13 @@ void draw_pointcloud(float width, float height, glfw_state& app_state, rs2::poin
         if (vertices[i].z)
         {
             // upload the point and texture coordinates only for points we have depth data for
-            glVertex3fv(vertices[i]);
+            struct rs2::vertex tmp;
+            tmp.x = vertices[i].x;
+            tmp.y = vertices[i].y;
+            tmp.z = vertices[i].z;
+            printf("%f %f %f\n", tmp.x, tmp.y, tmp.z);
+            glVertex3fv(tmp.operator const float *());
+//            glVertex3fv(vertices[i]);
             glTexCoord2fv(tex_coords[i]);
         }
     }

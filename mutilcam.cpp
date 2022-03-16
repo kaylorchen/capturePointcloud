@@ -9,6 +9,7 @@
 #include "core/DepthCamera.h"
 #include "boost/thread/thread.hpp"
 #include "time.h"
+#include "core/example.hpp"
 
 void showFramerate() {
     struct timespec timestamp;
@@ -19,63 +20,46 @@ void showFramerate() {
     last = current;
 }
 
+
 #define XYZRGB
+// Helper functions
+void register_glfw_callbacks(window& app, glfw_state& app_state);
+const int width = 848;
+const int height = 480;
 
 int main(int argc, char **argv) {
 
     auto firstTransform = std::make_unique<Eigen::Affine3f>(Eigen::Affine3f::Identity());
-    firstTransform->translation() << 0, 0, -0.1;
-    firstTransform->rotate(Eigen::AngleAxisf(M_PI, Eigen::Vector3f::UnitY()));
-    Eigen::Vector3f v;
-    v << 1 , 2 , 3.998845;
-    std::cout << v << std::endl;
-    float *p;
-    p = (float *) &v;
 
-    printf("sizeof(v) = %ld, *p = %f\n", sizeof (v), *(p+2));
-    return 0;
-    DepthCamera first("146222253926", std::move(firstTransform),
+//    firstTransform->translation() << 1.58, 0, 0;
+    firstTransform->rotate(Eigen::AngleAxisf(M_PI/6, Eigen::Vector3f::UnitY()));
+    std::cout << "firstTransform -> matrix():\n" << firstTransform->matrix() << std::endl;
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    cloud->resize(width * height);
+    cloud->is_dense = false;
+
+    DepthCamera first("146222253926", std::move(firstTransform), cloud, 0,
                       true, 848, 480, 60,
                       true, 848, 480, 60,
                       true, 848, 480, 60);
-    DepthCamera second("146222253257",
-                       true, 848, 480, 60,
-                       true, 848, 480, 60,
-                       true, 848, 480, 60);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr firstCloud;
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr secondCloud;
+//    DepthCamera second("146222253257", std::move(firstTransform), pcl::PointCloud::Ptr(),
+//                       true, 848, 480, 60,
+//                       true, 848, 480, 60,
+//                       true, 848, 480, 60);
 
-
-    pcl::visualization::CloudViewer viewer("Cloud Viewer");
-    while (!viewer.wasStopped()) {
-#ifdef XYZRGB
-        firstCloud = first.depthCameraPointXYZRGB();
-        secondCloud = second.depthCameraPointXYZRGB();
-
-#else
-        firstCloud = first.depthCameraPointXYZ();
-        secondCloud = second.depthCameraPointXYZ();
-#endif
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-        cloud->resize(firstCloud->size() + secondCloud->size());
-        cloud->is_dense = false;
-
-        uint32_t count = 0;
-        uint32_t i = 0;
-        while (i < firstCloud->size()) {
-            cloud->points[count] = firstCloud->points[i];
-            count++;
-            i++;
-        }
-        i = 0;
-        while (i < secondCloud->size()) {
-            cloud->points[count] = secondCloud->points[i];
-            count++;
-            i++;
-        }
-        std::cout << cloud->size() << " " << firstCloud->size() << " " << secondCloud->size() << count<< std::endl;
-
-        viewer.showCloud(secondCloud);
+    while (true){
+        first.generatePointCloud();
+    }
+    // Create a simple OpenGL window for rendering:
+    window app(848, 480, "RealSense Pointcloud Example");
+    // Construct an object to manage view state
+    glfw_state app_state;
+    // register callbacks to allow manipulation of the pointcloud
+    register_glfw_callbacks(app, app_state);
+    while(app){
+        first.generatePointCloud();
+        draw_pointcloud(app.width(), app.height(), app_state, cloud);
         showFramerate();
     }
     return EXIT_SUCCESS;
